@@ -1,3 +1,8 @@
+// src/pages/Dashboard.jsx
+import useAuth from '../hooks/useAuth'
+
 export default function Dashboard() {
-  return <div>Dashboard Page</div>
+  const { user } = useAuth()  // redirects if not logged in!
+
+  return <div>Welcome {user.name}!</div>
 }
