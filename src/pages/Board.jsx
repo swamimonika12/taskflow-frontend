@@ -51,7 +51,7 @@ export default function Board() {
     setError('')
 
     try {
-      const res = await createList({ title, boardId: id, board_id: id })
+     const res = await createList({ title, board: id })
       const list = normalizeList(parseListResponse(res.data))
       if (list?.id) {
         setLists((prev) => [...prev, list])
