@@ -49,7 +49,7 @@ export default function Dashboard() {
     setError('')
     try {
       const res = await getBoards()
-      setBoards(parseBoardsResponse(res.data))
+      setBoards(parseBoardsResponse(res))
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to load boards')
     } finally {

@@ -27,8 +27,10 @@ export default function Login() {
 
     try {
       const res = await loginUser(formData)
-      localStorage.setItem('token', res.data.data.access_token)
-      localStorage.setItem('user', JSON.stringify(res.data.data.user))
+
+    
+      localStorage.setItem('token', res.access_token)
+      localStorage.setItem('user', JSON.stringify(res.user))
       navigate('/dashboard')
     } catch (err) {
       setError(err.response?.data?.message || 'Something went wrong!')

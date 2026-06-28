@@ -1,8 +1,18 @@
 import axios from 'axios'
-
+import { extract } from './extractData'
 const API = axios.create({
   baseURL: 'http://localhost:3000/api',
 })
+
+export async function apiFetch(url, options = {}) {
+  const res = await fetch(url, {
+    headers: { "Content-Type": "application/json" },
+    ...options,
+  });
+
+  const json = await res.json();
+  return extract(json); // ✅ always get the real payload
+}
 
 API.interceptors.request.use((config) => {
   const token = localStorage.getItem('token')
@@ -17,19 +27,19 @@ API.interceptors.response.use(
   (error) => Promise.reject(error)
 )
 
-export const loginUser = (data) => API.post('/user/login', data)
-export const registerUser = (data) => API.post('/user', data)
+export const loginUser = (data) => API.post('/user/login', data).then(extract)
+export const registerUser = (data) => API.post('/user', data).then(extract)
 
-export const getBoards = () => API.get('/board/')
-export const getBoard = (id) => API.get(`/board/${id}/`)
-export const createBoard = (data) => API.post('/board/', data)
-export const deleteBoard = (id) => API.delete(`/board/${id}/`)
+export const getBoards = () => API.get('/board/').then(extract)
+export const getBoard = (id) => API.get(`/board/${id}/`).then(extract)
+export const createBoard = (data) => API.post('/board/', data).then(extract)
+export const deleteBoard = (id) => API.delete(`/board/${id}/`).then(extract)
 
-export const getListsByBoard = (boardId) => API.get(`/list/${boardId}`)
-export const createList = (data) => API.post('/list/', data)
+export const getListsByBoard = (boardId) => API.get(`/list/${boardId}`).then(extract)
+export const createList = (data) => API.post('/list/', data).then(extract)
 
-export const createCard = (data) => API.post('/card/', data)
-export const getCardsByList = (listId) => API.get(`/card/${listId}`)
+export const createCard = (data) => API.post('/card/', data).then(extract)
+export const getCardsByList = (listId) => API.get(`/card/${listId}`).then(extract)
 
 export function parseBoardsResponse(data) {
   if (Array.isArray(data)) return data

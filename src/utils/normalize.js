@@ -39,10 +39,9 @@ export function normalizeBoard(board) {
 }
 
 export function parseBoardDetailResponse(response) {
-  const payload = response?.data
+  const payload = response
   const nested = payload?.data?.data ?? payload?.data ?? payload
   const boardRaw = nested?.board ?? nested
-
   const board = normalizeBoard({
     _id: boardRaw?._id ?? boardRaw?.id,
     title: boardRaw?.title ?? boardRaw?.name,
@@ -52,6 +51,5 @@ export function parseBoardDetailResponse(response) {
   const lists = normalizeLists(
     nested?.lists ?? boardRaw?.lists ?? payload?.lists ?? []
   )
-
   return { board, lists }
 }

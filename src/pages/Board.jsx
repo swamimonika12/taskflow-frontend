@@ -27,8 +27,7 @@ export default function Board() {
     setError('')
     try {
       const boardRes = await getBoard(id)
-      const { board: boardData, lists: embeddedLists } =
-        parseBoardDetailResponse(boardRes)
+      const { board: boardData, lists: embeddedLists } = parseBoardDetailResponse(boardRes)
       setBoard(boardData)
       setLists(embeddedLists)
     } catch (err) {
