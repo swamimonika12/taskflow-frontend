@@ -28,6 +28,9 @@ export const deleteBoard = (id) => API.delete(`/board/${id}/`)
 export const getListsByBoard = (boardId) => API.get(`/list/${boardId}`)
 export const createList = (data) => API.post('/list/', data)
 
+export const createCard = (data) => API.post('/card/', data)
+export const getCardsByList = (listId) => API.get(`/card/${listId}`)
+
 export function parseBoardsResponse(data) {
   if (Array.isArray(data)) return data
   if (Array.isArray(data?.boards)) return data.boards
