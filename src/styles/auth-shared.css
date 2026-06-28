@@ -1,0 +1,96 @@
+/* Shared auth pages background (login, register) */
+.auth-page {
+  --auth-font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --auth-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --auth-text: #f8fafc;
+  --auth-muted: rgba(248, 250, 252, 0.72);
+
+  position: relative;
+  min-height: 100vh;
+  font-family: var(--auth-font);
+  color: var(--auth-text);
+  overflow-x: hidden;
+  background: #0c1222;
+}
+
+.auth-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% -10%, rgba(56, 189, 248, 0.35), transparent 55%),
+    radial-gradient(ellipse 60% 50% at 100% 50%, rgba(129, 140, 248, 0.28), transparent 50%),
+    radial-gradient(ellipse 50% 40% at 0% 80%, rgba(52, 211, 153, 0.2), transparent 45%),
+    linear-gradient(165deg, #0f172a 0%, #1e1b4b 42%, #0c4a6e 100%);
+}
+
+.auth-bg__orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.55;
+  animation: auth-float 18s var(--auth-ease) infinite;
+}
+
+.auth-bg__orb--1 {
+  width: 420px;
+  height: 420px;
+  top: -8%;
+  left: -5%;
+  background: #38bdf8;
+}
+
+.auth-bg__orb--2 {
+  width: 360px;
+  height: 360px;
+  bottom: 10%;
+  right: -8%;
+  background: #818cf8;
+  animation-delay: -6s;
+  animation-duration: 22s;
+}
+
+.auth-bg__orb--3 {
+  width: 280px;
+  height: 280px;
+  bottom: 35%;
+  left: 30%;
+  background: #34d399;
+  animation-delay: -12s;
+  animation-duration: 20s;
+  opacity: 0.35;
+}
+
+.auth-bg__grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, black 20%, transparent 75%);
+}
+
+@keyframes auth-float {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(24px, -20px) scale(1.05); }
+  66% { transform: translate(-16px, 12px) scale(0.96); }
+}
+
+@keyframes auth-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-bg__orb {
+    animation: none;
+  }
+}

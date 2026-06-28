@@ -9,10 +9,18 @@ export default function useAuth() {
     if (!token) {
       navigate('/login')
     }
-  }, [])
+  }, [navigate])
+
+  const logout = () => {
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
+    navigate('/login')
+  }
 
   return {
+    
     token: localStorage.getItem('token'),
-    user: JSON.parse(localStorage.getItem('user') || '{}')
+    user: JSON.parse(localStorage.getItem('user') || '{}'),
+    logout,
   }
 }

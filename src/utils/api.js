@@ -1,11 +1,9 @@
 import axios from 'axios'
 
-// Base URL — change this when deploying!
 const API = axios.create({
-  baseURL: 'http://localhost:3000/api'
+  baseURL: 'http://localhost:3000/api',
 })
 
-// Automatically add token to every request
 API.interceptors.request.use((config) => {
   const token = localStorage.getItem('token')
   if (token) {
@@ -14,22 +12,48 @@ API.interceptors.request.use((config) => {
   return config
 })
 
-// Auth APIs
-export const loginUser = (data) => API.post('user/login', data)
-export const registerUser = (data) => API.post('/user/', data)
+API.interceptors.response.use(
+  (response) => response,
+  (error) => Promise.reject(error)
+)
 
-// Board APIs
-export const getBoards = () => API.get('/boards')
-export const createBoard = (data) => API.post('/boards', data)
-export const deleteBoard = (id) => API.delete(`/boards/${id}`)
+export const loginUser = (data) => API.post('/user/login', data)
+export const registerUser = (data) => API.post('/user', data)
 
-// List APIs
-export const getLists = (boardId) => API.get(`/lists/${boardId}`)
-export const createList = (data) => API.post('/lists', data)
-export const deleteList = (id) => API.delete(`/lists/${id}`)
+export const getBoards = () => API.get('/board/')
+export const getBoard = (id) => API.get(`/board/${id}/`)
+export const createBoard = (data) => API.post('/board/', data)
+export const deleteBoard = (id) => API.delete(`/board/${id}/`)
 
-// Card APIs
-export const getCards = (listId) => API.get(`/cards/${listId}`)
-export const createCard = (data) => API.post('/cards', data)
-export const updateCard = (id, data) => API.put(`/cards/${id}`, data)
-export const deleteCard = (id) => API.delete(`/cards/${id}`)
+export const getListsByBoard = (boardId) => API.get(`/list/${boardId}`)
+export const createList = (data) => API.post('/list/', data)
+
+export function parseBoardsResponse(data) {
+  if (Array.isArray(data)) return data
+  if (Array.isArray(data?.boards)) return data.boards
+  if (Array.isArray(data?.data)) return data.data
+  return []
+}
+
+export function parseBoardResponse(data) {
+  return data?.board ?? data?.data ?? data
+}
+
+export function parseListsResponse(data) {
+  if (Array.isArray(data)) return data
+  if (Array.isArray(data?.lists)) return data.lists
+  if (Array.isArray(data?.data)) return data.data
+  return []
+}
+
+export function parseListResponse(data) {
+  return data?.list ?? data?.data ?? data
+}
+
+export function parseBoardDetail(data) {
+  const board = data?.board ?? data?.data ?? data
+  const lists = parseListsResponse(
+    data?.lists ?? board?.lists ?? (Array.isArray(data) ? data : [])
+  )
+  return { board, lists }
+}

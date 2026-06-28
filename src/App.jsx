@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route,Navigate  } from 'react-router-dom'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import Dashboard from './pages/Dashboard'
@@ -6,12 +6,13 @@ import Board from './pages/Board'
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter> 
       <Routes>
+        <Route path="/" element={<Navigate to="/login" />} />        
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/board/:id" element={<Board />} />
+        <Route path="/list/:id" element={<Board />} />
       </Routes>
     </BrowserRouter>
   )
