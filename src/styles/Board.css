@@ -577,8 +577,8 @@
 /* Empty board */
 .board-empty {
   position: absolute;
-  top: 50%;
-  left: 50%;
+  top: 31%;
+  left: 38%;
   transform: translate(-50%, -50%);
   width: min(100%, 22rem);
   padding: 2.5rem 2rem;
@@ -634,10 +634,6 @@
 
 .board-empty__btn:hover {
   transform: translateY(-2px);
-}
-
-.board-canvas {
-  position: relative;
 }
 
 @keyframes board-fade-up {
