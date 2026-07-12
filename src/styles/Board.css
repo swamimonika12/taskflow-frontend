@@ -1,6 +1,6 @@
 /* Board page — Kanban lists & cards (matches login/dashboard aesthetic) */
 .board-page {
-  --board-font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --board-font: "Segoe UI", system-ui, -apple-system, sans-serif;
   --board-ease: cubic-bezier(0.22, 1, 0.36, 1);
   --board-text: #f8fafc;
   --board-muted: rgba(248, 250, 252, 0.72);
@@ -44,7 +44,9 @@
 }
 
 @keyframes board-spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .board-error-panel {
@@ -376,7 +378,9 @@
   background: #f8fafc;
   outline: none;
   resize: vertical;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
 }
 
 .card-add__input:focus,
@@ -408,7 +412,9 @@
   cursor: pointer;
   background: linear-gradient(135deg, #0ea5e9, #6366f1);
   box-shadow: 0 4px 14px rgba(14, 165, 233, 0.35);
-  transition: transform 0.2s, opacity 0.2s;
+  transition:
+    transform 0.2s,
+    opacity 0.2s;
 }
 
 .card-add__submit:hover:not(:disabled) {
@@ -524,7 +530,9 @@
   font-size: 0.875rem;
   color: #0f172a;
   outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
 }
 
 .list-add__input:focus {
@@ -679,4 +687,24 @@
   .board-empty__btn:hover {
     transform: none;
   }
+}
+.task-card {
+  cursor: grab;
+  touch-action: none; /* prevents scroll from hijacking touch drags */
+}
+
+.task-card--ghost {
+  position: fixed;
+  pointer-events: none;
+  z-index: 999;
+  transform: rotate(2deg);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+}
+
+.drop-indicator {
+  height: 3px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #0ea5e9, #6366f1);
+  margin: 2px 2px;
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.6);
 }

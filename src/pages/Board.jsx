@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState, Fragment } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import ListColumn from '../components/ListColumn'
 import useAuth from '../hooks/useAuth'
@@ -6,6 +6,7 @@ import {
   createList,
   getBoard,
   parseListResponse,
+  deleteList
 } from '../utils/api'
 import { normalizeList, parseBoardDetailResponse } from '../utils/normalize'
 import '../styles/auth-shared.css'
@@ -23,13 +24,163 @@ export default function Board() {
   const [newListTitle, setNewListTitle] = useState('')
   const [creatingList, setCreatingList] = useState(false)
 
+  // ---- Drag & drop state (pointer-based, lifted here so cards can move
+  // between different ListColumn instances) ----
+  const [dragging, setDragging] = useState(null) // { cardId, sourceListId, card, offsetX, offsetY, width }
+  const [dropTarget, setDropTarget] = useState(null) // { listId, index }
+  const [pointerPos, setPointerPos] = useState({ x: 0, y: 0 })
+  const cardRefs = useRef({})
+  const listBodyRefs = useRef({})
+  const [deletingListId, setDeletingListId] = useState(null)
+
+
+
+
+  const handleDeleteList = async (e, list) => {
+    e.stopPropagation()
+    if (!window.confirm(`Delete "${list.title}"? This will also delete its cards.`)) return
+
+    setDeletingListId(list.id)
+    setError('')
+    try {
+      const check = await deleteList(list.id)
+      setLists((prev) => prev.filter((l) => l.id !== list.id))
+    } catch (err) {
+      console.log(err.message)
+      setError(err.response?.data?.message || 'Failed to delete list')
+    } finally {
+      setDeletingListId(null)
+    }
+  }
+
+  const registerCardRef = (cardId) => (node) => {
+    cardRefs.current[cardId] = node
+  }
+  const registerListBodyRef = (listId) => (node) => {
+    listBodyRefs.current[listId] = node
+  }
+
+  const findCardIndex = (listId, cardId) => {
+    const list = lists.find((l) => l.id === listId)
+    return list ? list.cards.findIndex((c) => c.id === cardId) : -1
+  }
+
+  const handleCardPointerDown = (e, card, sourceListId) => {
+    if (e.button !== undefined && e.button !== 0) return
+    const rect = e.currentTarget.getBoundingClientRect()
+    setDragging({
+      cardId: card.id,
+      sourceListId,
+      card,
+      offsetX: e.clientX - rect.left,
+      offsetY: e.clientY - rect.top,
+      width: rect.width,
+    })
+    setPointerPos({ x: e.clientX, y: e.clientY })
+    setDropTarget({ listId: sourceListId, index: findCardIndex(sourceListId, card.id) })
+    e.preventDefault()
+  }
+
+  useEffect(() => {
+    if (!dragging) return
+
+    function onPointerMove(e) {
+      setPointerPos({ x: e.clientX, y: e.clientY })
+
+      let hoveredListId = null
+      for (const [listId, node] of Object.entries(listBodyRefs.current)) {
+        if (!node) continue
+        const r = node.getBoundingClientRect()
+        if (e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom) {
+          hoveredListId = listId
+          break
+        }
+      }
+      if (!hoveredListId) return
+
+      const list = lists.find((l) => l.id === hoveredListId)
+      if (!list) return
+
+      let insertIndex = list.cards.length
+      for (let i = 0; i < list.cards.length; i++) {
+        const cardNode = cardRefs.current[list.cards[i].id]
+        if (!cardNode) continue
+        const r = cardNode.getBoundingClientRect()
+        const midpoint = r.top + r.height / 2
+        if (e.clientY < midpoint) {
+          insertIndex = i
+          break
+        }
+      }
+
+      setDropTarget({ listId: hoveredListId, index: insertIndex })
+    }
+
+    function onPointerUp() {
+      setDragging((currentDragging) => {
+        setDropTarget((currentTarget) => {
+          if (currentDragging && currentTarget) {
+            commitMove(currentDragging, currentTarget)
+          }
+          return null
+        })
+        return null
+      })
+    }
+
+    window.addEventListener('pointermove', onPointerMove)
+    window.addEventListener('pointerup', onPointerUp)
+    return () => {
+      window.removeEventListener('pointermove', onPointerMove)
+      window.removeEventListener('pointerup', onPointerUp)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dragging, lists])
+
+  function commitMove(dragInfo, target) {
+    const { cardId, sourceListId } = dragInfo
+    const { listId: targetListId, index: targetIndex } = target
+
+    let movedCard = null
+
+    setLists((prev) => {
+      const next = prev.map((l) => ({ ...l, cards: [...l.cards] }))
+      const sourceList = next.find((l) => l.id === sourceListId)
+      const targetList = next.find((l) => l.id === targetListId)
+      if (!sourceList || !targetList) return prev
+
+      const fromIndex = sourceList.cards.findIndex((c) => c.id === cardId)
+      if (fromIndex === -1) return prev
+
+      const [moved] = sourceList.cards.splice(fromIndex, 1)
+      movedCard = moved
+
+      let insertAt = targetIndex
+      if (sourceList === targetList && fromIndex < targetIndex) {
+        insertAt -= 1
+      }
+
+      targetList.cards.splice(insertAt, 0, moved)
+      return next
+    })
+
+    // TODO: once you have a backend endpoint for this (e.g. updateCard or
+    // moveCard), persist it here — something like:
+    //
+    // updateCard(cardId, { listId: targetListId, position: targetIndex })
+    //   .catch((err) => {
+    //     setError(err.response?.data?.message || 'Failed to move card')
+    //     loadBoardData() // reload to roll back the optimistic update
+    //   })
+  }
+
   const loadBoardData = useCallback(async () => {
     setError('')
     try {
       const boardRes = await getBoard(id)
       const { board: boardData, lists: embeddedLists } = parseBoardDetailResponse(boardRes)
       setBoard(boardData)
-      setLists(embeddedLists)
+      setLists(embeddedLists)   // ← add this line
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to load board')
     } finally {
@@ -50,7 +201,7 @@ export default function Board() {
     setError('')
 
     try {
-     const res = await createList({ title, board: id })
+      const res = await createList({ title, board: id })
       const list = normalizeList(parseListResponse(res.data))
       if (list?.id) {
         setLists((prev) => [...prev, list])
@@ -158,6 +309,13 @@ export default function Board() {
               onCardAdded={handleCardAdded}
               onError={setError}
               style={{ '--list-delay': `${index * 70}ms` }}
+              dragging={dragging}
+              dropTarget={dropTarget}
+              onCardPointerDown={handleCardPointerDown}
+              registerCardRef={registerCardRef}
+              registerListBodyRef={registerListBodyRef}
+              onDeleteList={handleDeleteList}
+              deletingList={deletingListId === list.id}
             />
           ))}
 
@@ -241,6 +399,23 @@ export default function Board() {
           </div>
         )}
       </div>
+
+      {/* Floating ghost card that follows the pointer while dragging */}
+      {dragging && (
+        <div
+          className="task-card task-card--ghost"
+          style={{
+            top: pointerPos.y - dragging.offsetY,
+            left: pointerPos.x - dragging.offsetX,
+            width: dragging.width,
+          }}
+        >
+          <h3 className="task-card__title">{dragging.card.title}</h3>
+          {dragging.card.description?.trim() && (
+            <p className="task-card__description">{dragging.card.description}</p>
+          )}
+        </div>
+      )}
     </div>
   )
 }
