@@ -24,10 +24,9 @@ export default function Board() {
   const [newListTitle, setNewListTitle] = useState('')
   const [creatingList, setCreatingList] = useState(false)
 
-  // ---- Drag & drop state (pointer-based, lifted here so cards can move
-  // between different ListColumn instances) ----
-  const [dragging, setDragging] = useState(null) // { cardId, sourceListId, card, offsetX, offsetY, width }
-  const [dropTarget, setDropTarget] = useState(null) // { listId, index }
+
+  const [dragging, setDragging] = useState(null)
+  const [dropTarget, setDropTarget] = useState(null)
   const [pointerPos, setPointerPos] = useState({ x: 0, y: 0 })
   const cardRefs = useRef({})
   const listBodyRefs = useRef({})

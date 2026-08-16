@@ -1,5 +1,5 @@
 import { Fragment, useState } from 'react'
-import { createCard } from '../utils/api'
+import { createCard, generateDescription } from '../utils/api'
 import { normalizeCard } from '../utils/normalize'
 import TaskCard from './TaskCard'
 import DropIndicator from './DropIndicator'
@@ -21,7 +21,7 @@ export default function ListColumn({
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [creating, setCreating] = useState(false)
-
+  const [generating, setGenerating] = useState(false)
   const handleSubmit = async (e) => {
     e.preventDefault()
     const trimmedTitle = title.trim()
@@ -57,6 +57,23 @@ export default function ListColumn({
     }
   }
 
+  const handleGenerateDescription = async () => {
+    const trimmedTitle = title.trim()
+    if (!trimmedTitle) return
+    setGenerating(true)
+    onError('')
+
+    try {
+      const res = await generateDescription(trimmedTitle)
+      console.log(res.data?.description)
+      setDescription(typeof res === 'string' ? res : res?.description || '')
+    } catch (err) {
+      console.error(err.message)
+      onError(err.response?.data?.message || 'Failed to generate description')
+    } finally {
+      setGenerating(false)
+    }
+  }
   return (
     <section className="list-column" style={style}>
       <header className="list-column__header">
@@ -124,6 +141,15 @@ export default function ListColumn({
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
             />
+            <button
+              type="button"
+              className="card-add__generate"
+              onClick={handleGenerateDescription}
+              disabled={generating || !title.trim()}
+            >
+              {generating ? 'Generating…' : 'Auto-generate description'}
+            </button>
+
             <div className="card-add__actions">
               <button
                 type="submit"

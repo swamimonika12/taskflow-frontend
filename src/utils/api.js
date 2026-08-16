@@ -15,6 +15,7 @@ export async function apiFetch(url, options = {}) {
   return extract(json);
 }
 
+
 API.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
   if (token) {
@@ -35,6 +36,8 @@ export const getBoards = () => API.get("/board/").then(extract);
 export const getBoard = (id) => API.get(`/board/${id}/`).then(extract);
 export const createBoard = (data) => API.post("/board/", data).then(extract);
 export const deleteBoard = (id) => API.delete(`/board/${id}/`).then(extract);
+
+export const generateDescription = (title) => API.post('/ai/generate-description', { title } ).then(extract);
 
 export const getListsByBoard = (boardId) =>
   API.get(`/list/${boardId}`).then(extract);

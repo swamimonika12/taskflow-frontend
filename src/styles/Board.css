@@ -441,6 +441,29 @@
   background: #e2e8f0;
 }
 
+.card-add__generate {
+  padding: 0.5rem 0.875rem;
+  border: 1.5px solid #6366f1;
+  border-radius: 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #6366f1;
+  background: rgba(99, 102, 241, 0.06);
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    opacity 0.2s;
+}
+
+.card-add__generate:hover:not(:disabled) {
+  background: rgba(99, 102, 241, 0.12);
+}
+
+.card-add__generate:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 /* Add list column */
 .list-add {
   flex-shrink: 0;
